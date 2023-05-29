@@ -1,16 +1,19 @@
-import { Controller } from '@nestjs/common';
-import { Client, ClientProxy, EventPattern } from '@nestjs/microservices';
-import { MQ_CONFIGURATION_REGISTER, MQ_TOPICS } from './config/constants';
+import { Controller, Inject } from '@nestjs/common';
+import { ClientProxy, EventPattern } from '@nestjs/microservices';
+import {
+  MQ_SERVICES,
+  MQ_TOPICS,
+} from './config/constants';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './commons/dto/create-order.dto';
 import { UpdateOrderDto } from './commons/dto/update-order.dto';
 
 @Controller()
 export class OrdersController {
-  constructor(private readonly orderService: OrdersService) {}
-
-  @Client(MQ_CONFIGURATION_REGISTER.INVOICES as any)
-  client: ClientProxy;
+  constructor(
+    private readonly orderService: OrdersService,
+    @Inject(MQ_SERVICES.ORDERS) private client: ClientProxy,
+  ) {}
 
   @EventPattern(MQ_TOPICS.CREATE_ORDER)
   create(data: CreateOrderDto) {

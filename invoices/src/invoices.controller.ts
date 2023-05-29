@@ -1,11 +1,7 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
-import {
-  MQ_CONFIGURATION_REGISTER,
-  MQ_TOPICS,
-  STORAGE_CLIENT,
-} from './config/constants';
-import { Client, ClientProxy, EventPattern } from '@nestjs/microservices';
+import { MQ_SERVICES, MQ_TOPICS, STORAGE_CLIENT } from './config/constants';
+import { ClientProxy, EventPattern } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 import { Readable } from 'stream';
 import { InjectConnection } from '@nestjs/mongoose';
@@ -15,10 +11,8 @@ export class InvoicesController {
   constructor(
     private readonly invoiceService: InvoicesService,
     @InjectConnection() private readonly db: any,
+    @Inject(MQ_SERVICES.INVOICES) private client: ClientProxy,
   ) {}
-
-  @Client(MQ_CONFIGURATION_REGISTER.INVOICES as any)
-  client: ClientProxy;
 
   // TODO: Improve types
   @EventPattern(MQ_TOPICS.CREATE_INVOICE)
