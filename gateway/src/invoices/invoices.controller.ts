@@ -1,18 +1,18 @@
 import {
   Controller,
+  Inject,
   Post,
   Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { Client, ClientProxy } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MQ_CONFIGURATION_REGISTER, MQ_TOPICS } from '../config/constants';
+import { MQ_SERVICES, MQ_TOPICS } from '../config/constants';
 
 @Controller('invoices')
 export class InvoicesController {
-  @Client(MQ_CONFIGURATION_REGISTER.INVOICES as any)
-  client: ClientProxy;
+  constructor(@Inject(MQ_SERVICES.INVOICES) private client: ClientProxy) {};
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
