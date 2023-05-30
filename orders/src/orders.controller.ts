@@ -41,7 +41,7 @@ export class OrdersController {
     const response = await this.orderService.update(_id, updateOrderDto);
 
     this.client.emit(MQ_TOPICS.SEND_INVOICE, {
-      invoiceId: response.get('invoiceId'),
+      invoiceId: response.invoiceId,
     });
 
     return response;

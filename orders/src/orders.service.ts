@@ -10,8 +10,7 @@ export class OrdersService {
   constructor(@InjectModel(Order.name) private orderModel: Model<Order>) {}
 
   create(createOrderDto: CreateOrderDto) {
-    const createdOrder = new this.orderModel(createOrderDto);
-    return this.orderModel.create(createdOrder);
+    return this.orderModel.create(createOrderDto);
   }
 
   findAll() {
