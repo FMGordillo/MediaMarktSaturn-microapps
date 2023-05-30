@@ -9,9 +9,47 @@ import { Invoice } from './commons/entities/invoice.entity';
 
 jest.mock('multer-gridfs-storage');
 
+const mockImplementation = {
+  create: jest
+    .fn()
+    .mockImplementation((data: any) =>
+      Promise.resolve({ _id: 'an uuid', ...data }),
+    ),
+  find: jest.fn().mockResolvedValue([]),
+  findById: jest.fn().mockImplementation((id: string) =>
+    Promise.resolve({
+      _id: id,
+      status: 'CREATED',
+    }),
+  ),
+  findByIdAndUpdate: jest
+    .fn()
+    .mockImplementation((id: string, data: any, options: any) =>
+      Promise.resolve({ _id: id, ...data }),
+    ),
+};
+
+class MockClass {
+  constructor(_data: any) {}
+
+  static create(data: any) {
+    return mockImplementation.create(data);
+  }
+
+  static find() {
+    return mockImplementation.find();
+  }
+
+  static findById(id: string) {
+    return mockImplementation.findById(id);
+  }
+
+  static findByIdAndUpdate(id: string) {
+    return mockImplementation.findByIdAndUpdate(id);
+  }
+}
+
 describe('InvoicesController', () => {
-  let invoiceModel: any = new Invoice();
-  let orderModel: any = new Order();
   let invoicesController: InvoicesController;
   let clientProxyMock: ClientProxy;
 
@@ -22,18 +60,17 @@ describe('InvoicesController', () => {
         InvoicesService,
         {
           provide: MQ_SERVICES.INVOICES,
-
           useValue: {
             send: jest.fn(),
           },
         },
         {
           provide: getModelToken(Invoice.name),
-          useValue: invoiceModel,
+          useFactory: () => MockClass,
         },
         {
           provide: getModelToken(Order.name),
-          useValue: orderModel,
+          useFactory: () => MockClass,
         },
         {
           provide: getConnectionToken(''),
@@ -49,6 +86,14 @@ describe('InvoicesController', () => {
   describe('root', () => {
     it('should be defined', () => {
       expect(invoicesController).toBeDefined();
+    });
+
+    it('should POST an invoice', async () => {
+      const response = await invoicesController.create({
+        orderId: '123',
+        file: '',
+      });
+      expect(response).toStrictEqual({});
     });
   });
 });
